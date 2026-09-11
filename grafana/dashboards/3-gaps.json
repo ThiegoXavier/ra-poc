@@ -1,0 +1,768 @@
+{
+  "uid": "ra-gaps",
+  "title": "\u26a0\ufe0f Gaps",
+  "tags": [
+    "ra-poc"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 1,
+  "templating": {
+    "list": [
+      {
+        "name": "cycle",
+        "type": "custom",
+        "label": "Billing Cycle",
+        "includeAll": false,
+        "multi": false,
+        "query": "%,2025-01,2025-02,2025-03,2025-04,2025-05,2025-06,2025-07,2025-08,2025-09,2025-10,2025-11,2025-12",
+        "options": [
+          {
+            "text": "All",
+            "value": "%",
+            "selected": true
+          },
+          {
+            "text": "2025-01",
+            "value": "2025-01",
+            "selected": false
+          },
+          {
+            "text": "2025-02",
+            "value": "2025-02",
+            "selected": false
+          },
+          {
+            "text": "2025-03",
+            "value": "2025-03",
+            "selected": false
+          },
+          {
+            "text": "2025-04",
+            "value": "2025-04",
+            "selected": false
+          },
+          {
+            "text": "2025-05",
+            "value": "2025-05",
+            "selected": false
+          },
+          {
+            "text": "2025-06",
+            "value": "2025-06",
+            "selected": false
+          },
+          {
+            "text": "2025-07",
+            "value": "2025-07",
+            "selected": false
+          },
+          {
+            "text": "2025-08",
+            "value": "2025-08",
+            "selected": false
+          },
+          {
+            "text": "2025-09",
+            "value": "2025-09",
+            "selected": false
+          },
+          {
+            "text": "2025-10",
+            "value": "2025-10",
+            "selected": false
+          },
+          {
+            "text": "2025-11",
+            "value": "2025-11",
+            "selected": false
+          },
+          {
+            "text": "2025-12",
+            "value": "2025-12",
+            "selected": false
+          }
+        ],
+        "current": {
+          "text": "All",
+          "value": "%",
+          "selected": true
+        }
+      },
+      {
+        "name": "gap_type",
+        "type": "custom",
+        "label": "Gap Type",
+        "includeAll": false,
+        "multi": false,
+        "query": "GAP_%,GAP_OVERCHARGE,GAP_UNDERCHARGE,GAP_MISSING",
+        "options": [
+          {
+            "text": "All",
+            "value": "GAP_%",
+            "selected": true
+          },
+          {
+            "text": "GAP_OVERCHARGE",
+            "value": "GAP_OVERCHARGE",
+            "selected": false
+          },
+          {
+            "text": "GAP_UNDERCHARGE",
+            "value": "GAP_UNDERCHARGE",
+            "selected": false
+          },
+          {
+            "text": "GAP_MISSING",
+            "value": "GAP_MISSING",
+            "selected": false
+          }
+        ],
+        "current": {
+          "text": "All",
+          "value": "GAP_%",
+          "selected": true
+        }
+      },
+      {
+        "name": "customer",
+        "type": "query",
+        "label": "Customer",
+        "datasource": {
+          "type": "postgres",
+          "uid": "ra-postgres"
+        },
+        "query": "SELECT 'All' AS __text, '%' AS __value UNION ALL SELECT customer_code, customer_code FROM customer ORDER BY 1;",
+        "includeAll": false,
+        "multi": false,
+        "refresh": 1,
+        "current": {
+          "text": "All",
+          "value": "%",
+          "selected": true
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Total Gaps",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#1E88E5"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#1E88E5",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS \"Total\" FROM ra_result r JOIN ra_run rr ON rr.run_id=r.run_id JOIN billing_cycle bc ON bc.cycle_id=rr.cycle_id JOIN customer cu ON cu.customer_id=r.customer_id WHERE r.status LIKE '$gap_type' AND bc.cycle_code LIKE '$cycle' AND cu.customer_code LIKE '$customer';",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 1
+    },
+    {
+      "type": "stat",
+      "title": "Total Gap Value",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#E53935"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#E53935",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COALESCE(SUM(ABS(COALESCE(r.difference,r.expected_amount))),0) AS \"Value\" FROM ra_result r JOIN ra_run rr ON rr.run_id=r.run_id JOIN billing_cycle bc ON bc.cycle_id=rr.cycle_id JOIN customer cu ON cu.customer_id=r.customer_id WHERE r.status LIKE '$gap_type' AND bc.cycle_code LIKE '$cycle' AND cu.customer_code LIKE '$customer';",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 2
+    },
+    {
+      "type": "stat",
+      "title": "Overcharge",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#E53935"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#E53935",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS \"OC\" FROM ra_result r JOIN ra_run rr ON rr.run_id=r.run_id JOIN billing_cycle bc ON bc.cycle_id=rr.cycle_id JOIN customer cu ON cu.customer_id=r.customer_id WHERE r.status='GAP_OVERCHARGE' AND bc.cycle_code LIKE '$cycle' AND cu.customer_code LIKE '$customer';",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 3
+    },
+    {
+      "type": "stat",
+      "title": "Undercharge",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#FB8C00"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#FB8C00",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS \"UC\" FROM ra_result r JOIN ra_run rr ON rr.run_id=r.run_id JOIN billing_cycle bc ON bc.cycle_id=rr.cycle_id JOIN customer cu ON cu.customer_id=r.customer_id WHERE r.status='GAP_UNDERCHARGE' AND bc.cycle_code LIKE '$cycle' AND cu.customer_code LIKE '$customer';",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 4
+    },
+    {
+      "type": "stat",
+      "title": "Missing",
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#8E24AA"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8E24AA",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS \"MI\" FROM ra_result r JOIN ra_run rr ON rr.run_id=r.run_id JOIN billing_cycle bc ON bc.cycle_id=rr.cycle_id JOIN customer cu ON cu.customer_id=r.customer_id WHERE r.status='GAP_MISSING' AND bc.cycle_code LIKE '$cycle' AND cu.customer_code LIKE '$customer';",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 5
+    },
+    {
+      "type": "piechart",
+      "title": "Gap Type Distribution",
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 0,
+        "y": 4
+      },
+      "fieldConfig": {
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Overcharge"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#E53935"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Undercharge"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FB8C00"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Missing"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#8E24AA"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "pieType": "donut",
+        "reduceOptions": {
+          "values": true,
+          "calcs": []
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value",
+            "percent"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT SUM(CASE WHEN r.status='GAP_OVERCHARGE' THEN 1 ELSE 0 END) AS \"Overcharge\", SUM(CASE WHEN r.status='GAP_UNDERCHARGE' THEN 1 ELSE 0 END) AS \"Undercharge\", SUM(CASE WHEN r.status='GAP_MISSING' THEN 1 ELSE 0 END) AS \"Missing\" FROM ra_result r JOIN ra_run rr ON rr.run_id=r.run_id JOIN billing_cycle bc ON bc.cycle_id=rr.cycle_id JOIN customer cu ON cu.customer_id=r.customer_id WHERE r.status LIKE '$gap_type' AND bc.cycle_code LIKE '$cycle' AND cu.customer_code LIKE '$customer';",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 6
+    },
+    {
+      "type": "table",
+      "title": "Gap Details",
+      "gridPos": {
+        "h": 13,
+        "w": 16,
+        "x": 8,
+        "y": 4
+      },
+      "fieldConfig": {
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Expected"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Billed"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Difference"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-reds"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Type"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "GAP_OVERCHARGE": {
+                        "text": "\ud83d\udd34 Overcharge"
+                      },
+                      "GAP_UNDERCHARGE": {
+                        "text": "\ud83d\udfe0 Undercharge"
+                      },
+                      "GAP_MISSING": {
+                        "text": "\ud83d\udfe3 Missing"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Difference",
+            "desc": true
+          }
+        ]
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT bc.cycle_code AS \"Cycle\", c.customer_code AS \"Customer\", c.customer_name AS \"Name\", o.offer_name AS \"Offer\", r.status AS \"Type\", r.expected_amount AS \"Expected\", r.billed_amount AS \"Billed\", ABS(COALESCE(r.difference, r.expected_amount)) AS \"Difference\", r.justification AS \"Justification\" FROM ra_result r JOIN ra_run rr ON rr.run_id=r.run_id JOIN billing_cycle bc ON bc.cycle_id=rr.cycle_id JOIN customer c ON c.customer_id=r.customer_id JOIN contract ct ON ct.contract_id=r.contract_id JOIN offer o ON o.offer_id=ct.offer_id WHERE r.status LIKE '$gap_type' AND bc.cycle_code LIKE '$cycle' AND c.customer_code LIKE '$customer' ORDER BY ABS(COALESCE(r.difference, r.expected_amount)) DESC LIMIT 200;",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 7
+    },
+    {
+      "type": "barchart",
+      "title": "\ud83c\udfc6 Top 10 Customers by Gap Value",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#E53935"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "xTickLabelRotation": -45,
+        "showValue": "auto",
+        "barWidth": 0.7,
+        "groupWidth": 0.7,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT c.customer_code AS \"Customer\", ROUND(SUM(ABS(COALESCE(r.difference, r.expected_amount)))::numeric,2) AS \"Gap Value\" FROM ra_result r JOIN customer c ON c.customer_id=r.customer_id JOIN ra_run rr ON rr.run_id=r.run_id JOIN billing_cycle bc ON bc.cycle_id=rr.cycle_id WHERE r.status LIKE '$gap_type' AND bc.cycle_code LIKE '$cycle' AND c.customer_code LIKE '$customer' GROUP BY c.customer_code ORDER BY \"Gap Value\" DESC LIMIT 10;",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 8
+    }
+  ],
+  "schemaVersion": 39,
+  "links": [
+    {
+      "title": "\ud83c\udfe0 Overview",
+      "type": "link",
+      "url": "/d/ra-overview",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udd0d RA Controls",
+      "type": "link",
+      "url": "/d/ra-controls",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\u26a0\ufe0f Gaps",
+      "type": "link",
+      "url": "/d/ra-gaps",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udce6 By Offer",
+      "type": "link",
+      "url": "/d/ra-by-offer",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udcc8 Projections",
+      "type": "link",
+      "url": "/d/ra-projections",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udc64 Customers",
+      "type": "link",
+      "url": "/d/ra-customers",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83e\udd16 ML Insights",
+      "type": "link",
+      "url": "/d/ra-ml-insights",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\uddc2\ufe0f Offers & Rules",
+      "type": "link",
+      "url": "/d/ra-offers-rules",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udcd1 Contracts & Rules",
+      "type": "link",
+      "url": "/d/ra-customer-contracts",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    }
+  ],
+  "time": {
+    "from": "2024-01-01T00:00:00.000Z",
+    "to": "2027-01-01T00:00:00.000Z"
+  },
+  "refresh": "",
+  "version": 1,
+  "id": null
+}

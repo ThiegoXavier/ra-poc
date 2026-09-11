@@ -1,0 +1,581 @@
+{
+  "uid": "ra-customer-contracts",
+  "title": "\ud83d\udcd1 Customer Contracts & Rules",
+  "tags": [
+    "ra-poc",
+    "catalog"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 1,
+  "time": {
+    "from": "2024-01-01T00:00:00.000Z",
+    "to": "2027-01-01T00:00:00.000Z"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "customer",
+        "type": "query",
+        "datasource": {
+          "type": "postgres",
+          "uid": "ra-postgres"
+        },
+        "query": "SELECT customer_code AS __value, customer_code || ' \u2014 ' || customer_name AS __text FROM customer ORDER BY customer_code;",
+        "label": "Customer",
+        "current": {
+          "text": "CLI-00001",
+          "value": "CLI-00001"
+        },
+        "refresh": 1,
+        "includeAll": false
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "table",
+      "title": "\ud83d\udc64 Customer",
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "ACTIVE": {
+                        "color": "#43A047"
+                      },
+                      "SUSPENDED": {
+                        "color": "#FB8C00"
+                      },
+                      "CANCELLED": {
+                        "color": "#E53935"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Type"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "PF": {
+                        "text": "Individual (PF)"
+                      },
+                      "PJ": {
+                        "text": "Business (PJ)"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT customer_code AS \"Code\", customer_name AS \"Name\", customer_type AS \"Type\", document_number AS \"Document\", status AS \"Status\" FROM customer WHERE customer_code='${customer}';",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Contracts",
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 0,
+        "y": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#1E88E5"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#1E88E5",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS \"Contracts\" FROM contract c JOIN customer cu ON cu.customer_id=c.customer_id WHERE cu.customer_code='${customer}';",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Monthly List Price",
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 8,
+        "y": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#8E24AA"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8E24AA",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COALESCE(SUM(o.base_price),0) AS \"Total\" FROM contract c JOIN offer o ON o.offer_id=c.offer_id JOIN customer cu ON cu.customer_id=c.customer_id WHERE cu.customer_code='${customer}' AND c.status='ACTIVE';",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Active Contracts",
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#43A047"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#43A047",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS \"Active\" FROM contract c JOIN customer cu ON cu.customer_id=c.customer_id WHERE cu.customer_code='${customer}' AND c.status='ACTIVE';",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      }
+    },
+    {
+      "id": 5,
+      "type": "table",
+      "title": "\ud83d\udcc4 Contracts \u00d7 Offers",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "List Price"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Discount %"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Type"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "PLAN": {
+                        "color": "#1E88E5"
+                      },
+                      "ADDON": {
+                        "color": "#43A047"
+                      },
+                      "PROMO": {
+                        "color": "#FB8C00"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "ACTIVE": {
+                        "color": "#43A047"
+                      },
+                      "SUSPENDED": {
+                        "color": "#FB8C00"
+                      },
+                      "CANCELLED": {
+                        "color": "#E53935"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Start",
+            "desc": false
+          }
+        ]
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT c.contract_code AS \"Contract\", o.offer_code AS \"Offer Code\", o.offer_name AS \"Offer\", o.offer_type AS \"Type\", o.base_price AS \"List Price\", c.status AS \"Status\", c.start_date AS \"Start\", c.end_date AS \"End\", c.loyalty_months AS \"Loyalty (mo)\", c.discount_pct AS \"Discount %\" FROM contract c JOIN offer o ON o.offer_id=c.offer_id JOIN customer cu ON cu.customer_id=c.customer_id WHERE cu.customer_code='${customer}' ORDER BY c.start_date;",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      }
+    },
+    {
+      "id": 6,
+      "type": "table",
+      "title": "\u2699\ufe0f Pricing Rules for this Customer's Offers",
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Rule Type"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "BASE_PRICE": {
+                        "color": "#1E88E5"
+                      },
+                      "LOYALTY_DISCOUNT": {
+                        "color": "#43A047"
+                      },
+                      "PROMO_DISCOUNT": {
+                        "color": "#FB8C00"
+                      },
+                      "COMBO_DISCOUNT": {
+                        "color": "#8E24AA"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Applies?"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "YES": {
+                        "color": "#43A047"
+                      },
+                      "no": {
+                        "color": "#9E9E9E"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Contract",
+            "desc": false
+          }
+        ]
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT c.contract_code AS \"Contract\", o.offer_name AS \"Offer\", r.rule_type AS \"Rule Type\", CASE WHEN r.value_type='PERCENT' THEN r.rule_value || '%' ELSE '$' || r.rule_value END AS \"Value\", COALESCE(r.min_months::text,'-') AS \"Min Months\", COALESCE(r.max_months::text,'-') AS \"Max Months\", r.description AS \"Description\", CASE WHEN r.rule_type='BASE_PRICE' THEN 'YES' WHEN r.rule_type='LOYALTY_DISCOUNT' AND c.loyalty_months >= r.min_months THEN 'YES' WHEN r.rule_type='LOYALTY_DISCOUNT' THEN 'no' ELSE 'YES' END AS \"Applies?\" FROM contract c JOIN offer o ON o.offer_id=c.offer_id JOIN offer_rule r ON r.offer_id=o.offer_id JOIN customer cu ON cu.customer_id=c.customer_id WHERE cu.customer_code='${customer}' ORDER BY c.contract_code, r.rule_type;",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      }
+    }
+  ],
+  "schemaVersion": 39,
+  "links": [
+    {
+      "title": "\ud83c\udfe0 Overview",
+      "type": "link",
+      "url": "/d/ra-overview",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udd0d RA Controls",
+      "type": "link",
+      "url": "/d/ra-controls",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\u26a0\ufe0f Gaps",
+      "type": "link",
+      "url": "/d/ra-gaps",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udce6 By Offer",
+      "type": "link",
+      "url": "/d/ra-by-offer",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udcc8 Projections",
+      "type": "link",
+      "url": "/d/ra-projections",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udc64 Customers",
+      "type": "link",
+      "url": "/d/ra-customers",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83e\udd16 ML Insights",
+      "type": "link",
+      "url": "/d/ra-ml-insights",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\uddc2\ufe0f Offers & Rules",
+      "type": "link",
+      "url": "/d/ra-offers-rules",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udcd1 Contracts & Rules",
+      "type": "link",
+      "url": "/d/ra-customer-contracts",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    }
+  ]
+}

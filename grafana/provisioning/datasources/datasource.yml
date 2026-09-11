@@ -1,0 +1,18 @@
+apiVersion: 1
+datasources:
+  - name: RA-PostgreSQL
+    uid: ra-postgres
+    type: postgres
+    access: proxy
+    url: postgres.ra-poc.svc.cluster.local:5432
+    database: ra_billing
+    user: ra_admin
+    jsonData:
+      sslmode: disable
+      maxOpenConns: 10
+      postgresVersion: 1600
+      timescaledb: false
+    secureJsonData:
+      password: ra_poc_2024
+    isDefault: true
+    editable: true

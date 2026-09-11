@@ -1,0 +1,605 @@
+{
+  "uid": "ra-offers-rules",
+  "title": "\ud83d\uddc2\ufe0f Offers & Rules",
+  "tags": [
+    "ra-poc",
+    "catalog"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 1,
+  "time": {
+    "from": "2024-01-01T00:00:00.000Z",
+    "to": "2027-01-01T00:00:00.000Z"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "offer_type",
+        "type": "custom",
+        "query": "PLAN,ADDON,PROMO",
+        "includeAll": true,
+        "allValue": "%",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "multi": false,
+        "label": "Offer Type"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Total Offers",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#1E88E5"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#1E88E5",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS \"Offers\" FROM offer WHERE offer_type LIKE '${offer_type}';",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Plans",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#1E88E5"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#1E88E5",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS \"Plans\" FROM offer WHERE offer_type='PLAN';",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Addons",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#43A047"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#43A047",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS \"Addons\" FROM offer WHERE offer_type='ADDON';",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Promos",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#FB8C00"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#FB8C00",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS \"Promos\" FROM offer WHERE offer_type='PROMO';",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      }
+    },
+    {
+      "id": 5,
+      "type": "table",
+      "title": "\ud83d\udccb Offer Catalog",
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Base Price"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Type"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "PLAN": {
+                        "color": "#1E88E5"
+                      },
+                      "ADDON": {
+                        "color": "#43A047"
+                      },
+                      "PROMO": {
+                        "color": "#FB8C00"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Active Contracts"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "gauge"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Active Contracts",
+            "desc": true
+          }
+        ]
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT o.offer_code AS \"Code\", o.offer_name AS \"Name\", o.offer_type AS \"Type\", o.base_price AS \"Base Price\", o.recurrence AS \"Recurrence\", COUNT(DISTINCT c.contract_id) FILTER (WHERE c.status='ACTIVE') AS \"Active Contracts\" FROM offer o LEFT JOIN contract c ON c.offer_id=o.offer_id WHERE o.offer_type LIKE '${offer_type}' GROUP BY o.offer_code, o.offer_name, o.offer_type, o.base_price, o.recurrence ORDER BY \"Active Contracts\" DESC;",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      }
+    },
+    {
+      "id": 6,
+      "type": "table",
+      "title": "\u2699\ufe0f Pricing Rules",
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Rule Type"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "BASE_PRICE": {
+                        "color": "#1E88E5"
+                      },
+                      "LOYALTY_DISCOUNT": {
+                        "color": "#43A047"
+                      },
+                      "PROMO_DISCOUNT": {
+                        "color": "#FB8C00"
+                      },
+                      "COMBO_DISCOUNT": {
+                        "color": "#8E24AA"
+                      },
+                      "PENALTY": {
+                        "color": "#E53935"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Offer",
+            "desc": false
+          }
+        ]
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT o.offer_code AS \"Offer\", o.offer_type AS \"Type\", r.rule_type AS \"Rule Type\", CASE WHEN r.value_type='PERCENT' THEN r.rule_value || '%' ELSE '$' || r.rule_value END AS \"Value\", r.value_type AS \"Value Type\", COALESCE(r.min_months::text,'-') AS \"Min Months\", COALESCE(r.max_months::text,'-') AS \"Max Months\", r.description AS \"Description\" FROM offer_rule r JOIN offer o ON o.offer_id=r.offer_id WHERE o.offer_type LIKE '${offer_type}' ORDER BY o.offer_code, r.rule_type;",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      }
+    },
+    {
+      "id": 7,
+      "type": "barchart",
+      "title": "\ud83d\udcb5 Base Price by Offer",
+      "gridPos": {
+        "h": 9,
+        "w": 14,
+        "x": 0,
+        "y": 27
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PLAN"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#1E88E5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ADDON"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#43A047"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "xTickLabelRotation": -45,
+        "showValue": "auto",
+        "barWidth": 0.7,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT offer_name AS \"Offer\", base_price AS \"Base Price\" FROM offer WHERE base_price > 0 AND offer_type LIKE '${offer_type}' ORDER BY base_price DESC;",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      }
+    },
+    {
+      "id": 8,
+      "type": "piechart",
+      "title": "\ud83d\udcca Rules by Type",
+      "gridPos": {
+        "h": 9,
+        "w": 10,
+        "x": 14,
+        "y": 27
+      },
+      "fieldConfig": {
+        "overrides": []
+      },
+      "options": {
+        "pieType": "donut",
+        "reduceOptions": {
+          "values": true,
+          "calcs": []
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value",
+            "percent"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT rule_type AS metric, COUNT(*) AS value FROM offer_rule GROUP BY rule_type ORDER BY value DESC;",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      }
+    }
+  ],
+  "schemaVersion": 39,
+  "links": [
+    {
+      "title": "\ud83c\udfe0 Overview",
+      "type": "link",
+      "url": "/d/ra-overview",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udd0d RA Controls",
+      "type": "link",
+      "url": "/d/ra-controls",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\u26a0\ufe0f Gaps",
+      "type": "link",
+      "url": "/d/ra-gaps",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udce6 By Offer",
+      "type": "link",
+      "url": "/d/ra-by-offer",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udcc8 Projections",
+      "type": "link",
+      "url": "/d/ra-projections",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udc64 Customers",
+      "type": "link",
+      "url": "/d/ra-customers",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83e\udd16 ML Insights",
+      "type": "link",
+      "url": "/d/ra-ml-insights",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\uddc2\ufe0f Offers & Rules",
+      "type": "link",
+      "url": "/d/ra-offers-rules",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udcd1 Contracts & Rules",
+      "type": "link",
+      "url": "/d/ra-customer-contracts",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    }
+  ]
+}

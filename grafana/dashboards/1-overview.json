@@ -1,0 +1,834 @@
+{
+  "uid": "ra-overview",
+  "title": "\ud83c\udfe0 Overview",
+  "tags": [
+    "ra-poc"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Total Revenue (12 mo)",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#1E88E5"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#1E88E5",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT SUM(total_amount) AS \"Total Revenue\" FROM invoice;",
+          "format": "table",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          },
+          "refId": "A",
+          "hide": false
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 1
+    },
+    {
+      "type": "stat",
+      "title": "Revenue Leakage",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#E53935"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#E53935",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COALESCE(SUM(ABS(COALESCE(difference, expected_amount))),0) AS \"Leakage\" FROM ra_result WHERE status LIKE 'GAP_%';",
+          "format": "table",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          },
+          "refId": "A",
+          "hide": false
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 2
+    },
+    {
+      "type": "stat",
+      "title": "Active Customers",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#43A047"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#43A047",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS \"Customers\" FROM customer WHERE status = 'ACTIVE';",
+          "format": "table",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          },
+          "refId": "A",
+          "hide": false
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 3
+    },
+    {
+      "type": "stat",
+      "title": "Active Contracts",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#8E24AA"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8E24AA",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS \"Contracts\" FROM contract WHERE status = 'ACTIVE';",
+          "format": "table",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          },
+          "refId": "A",
+          "hide": false
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 4
+    },
+    {
+      "type": "stat",
+      "title": "Leakage Rate",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#43A047",
+                "value": null
+              },
+              {
+                "color": "#FB8C00",
+                "value": 2
+              },
+              {
+                "color": "#E53935",
+                "value": 5
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT ROUND(100.0 * COALESCE(SUM(ABS(COALESCE(r.difference, r.expected_amount))),0) / NULLIF((SELECT SUM(total_amount) FROM invoice),0), 2) AS \"Leakage %\" FROM ra_result r WHERE r.status LIKE 'GAP_%';",
+          "format": "table",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          },
+          "refId": "A",
+          "hide": false
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 5
+    },
+    {
+      "type": "stat",
+      "title": "Total Gaps",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#FB8C00"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#FB8C00",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS \"Gaps\" FROM ra_result WHERE status LIKE 'GAP_%';",
+          "format": "table",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          },
+          "refId": "A",
+          "hide": false
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 6
+    },
+    {
+      "type": "stat",
+      "title": "Billing Accuracy",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#E53935",
+                "value": null
+              },
+              {
+                "color": "#FB8C00",
+                "value": 90
+              },
+              {
+                "color": "#43A047",
+                "value": 95
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT ROUND(100.0 * SUM(CASE WHEN status='MATCH' THEN 1 ELSE 0 END) / COUNT(*), 2) AS \"Accuracy\" FROM ra_result;",
+          "format": "table",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          },
+          "refId": "A",
+          "hide": false
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 7
+    },
+    {
+      "type": "stat",
+      "title": "Total Invoices",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#546E7A"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#546E7A",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS \"Invoices\" FROM invoice;",
+          "format": "table",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          },
+          "refId": "A",
+          "hide": false
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 8
+    },
+    {
+      "type": "barchart",
+      "title": "Revenue by Billing Cycle",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#1E88E5"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "xTickLabelRotation": -45,
+        "showValue": "auto",
+        "barWidth": 0.7,
+        "groupWidth": 0.7,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT bc.cycle_code AS \"Cycle\", SUM(i.total_amount) AS \"Revenue\" FROM billing_cycle bc JOIN invoice i ON i.cycle_id = bc.cycle_id GROUP BY bc.cycle_code ORDER BY bc.cycle_code;",
+          "format": "table",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          },
+          "refId": "A",
+          "hide": false
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 9
+    },
+    {
+      "type": "barchart",
+      "title": "RA Results Trend",
+      "gridPos": {
+        "h": 9,
+        "w": 14,
+        "x": 0,
+        "y": 17
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Match"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#43A047"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Justified"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FB8C00"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Gaps"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#E53935"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "xTickLabelRotation": -45,
+        "showValue": "auto",
+        "barWidth": 0.7,
+        "groupWidth": 0.7,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT bc.cycle_code AS \"Cycle\", SUM(CASE WHEN r.status='MATCH' THEN 1 ELSE 0 END) AS \"Match\", SUM(CASE WHEN r.status='JUSTIFIED' THEN 1 ELSE 0 END) AS \"Justified\", SUM(CASE WHEN r.status LIKE 'GAP_%' THEN 1 ELSE 0 END) AS \"Gaps\" FROM ra_run rr JOIN billing_cycle bc ON bc.cycle_id=rr.cycle_id JOIN ra_result r ON r.run_id=rr.run_id GROUP BY bc.cycle_code ORDER BY bc.cycle_code;",
+          "format": "table",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          },
+          "refId": "A",
+          "hide": false
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 10
+    },
+    {
+      "type": "piechart",
+      "title": "Result Distribution (All Cycles)",
+      "gridPos": {
+        "h": 9,
+        "w": 10,
+        "x": 14,
+        "y": 17
+      },
+      "fieldConfig": {
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Match"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#43A047"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Justified"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FB8C00"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Gaps"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#E53935"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "values": true,
+          "calcs": []
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "pieType": "donut"
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT SUM(CASE WHEN status='MATCH' THEN 1 ELSE 0 END) AS \"Match\", SUM(CASE WHEN status='JUSTIFIED' THEN 1 ELSE 0 END) AS \"Justified\", SUM(CASE WHEN status LIKE 'GAP_%' THEN 1 ELSE 0 END) AS \"Gaps\" FROM ra_result;",
+          "format": "table",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          },
+          "refId": "A",
+          "hide": false
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 11
+    },
+    {
+      "type": "barchart",
+      "title": "Billing Accuracy by Cycle (Target: 95%)",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "xTickLabelRotation": -45,
+        "showValue": "auto",
+        "barWidth": 0.7,
+        "groupWidth": 0.7,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT bc.cycle_code AS \"Cycle\", ROUND(100.0 * SUM(CASE WHEN r.status='MATCH' THEN 1 ELSE 0 END) / COUNT(*), 2) AS \"Accuracy\" FROM ra_run rr JOIN billing_cycle bc ON bc.cycle_id=rr.cycle_id JOIN ra_result r ON r.run_id=rr.run_id GROUP BY bc.cycle_code ORDER BY bc.cycle_code;",
+          "format": "table",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          },
+          "refId": "A",
+          "hide": false
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 12
+    }
+  ],
+  "schemaVersion": 39,
+  "version": 1,
+  "links": [
+    {
+      "title": "\ud83c\udfe0 Overview",
+      "type": "link",
+      "url": "/d/ra-overview",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udd0d RA Controls",
+      "type": "link",
+      "url": "/d/ra-controls",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\u26a0\ufe0f Gaps",
+      "type": "link",
+      "url": "/d/ra-gaps",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udce6 By Offer",
+      "type": "link",
+      "url": "/d/ra-by-offer",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udcc8 Projections",
+      "type": "link",
+      "url": "/d/ra-projections",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udc64 Customers",
+      "type": "link",
+      "url": "/d/ra-customers",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83e\udd16 ML Insights",
+      "type": "link",
+      "url": "/d/ra-ml-insights",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\uddc2\ufe0f Offers & Rules",
+      "type": "link",
+      "url": "/d/ra-offers-rules",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udcd1 Contracts & Rules",
+      "type": "link",
+      "url": "/d/ra-customer-contracts",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    }
+  ],
+  "time": {
+    "from": "2024-01-01T00:00:00.000Z",
+    "to": "2027-01-01T00:00:00.000Z"
+  },
+  "refresh": "",
+  "id": null
+}

@@ -1,0 +1,648 @@
+{
+  "uid": "ra-projections",
+  "title": "\ud83d\udcc8 Projections",
+  "tags": [
+    "ra-poc"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Last Month Revenue",
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#1E88E5"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#1E88E5",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT SUM(i.total_amount) AS \"Revenue\" FROM invoice i JOIN billing_cycle bc ON bc.cycle_id=i.cycle_id WHERE bc.cycle_code=(SELECT MAX(cycle_code) FROM billing_cycle);",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 1
+    },
+    {
+      "type": "stat",
+      "title": "Next Month Projection",
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#43A047"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#43A047",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT projected_revenue AS \"Projected\" FROM ra_projection ORDER BY cycle_code LIMIT 1;",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 2
+    },
+    {
+      "type": "stat",
+      "title": "Avg Ticket",
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#8E24AA"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#8E24AA",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT avg_ticket AS \"Ticket\" FROM ra_projection ORDER BY cycle_code LIMIT 1;",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 3
+    },
+    {
+      "type": "barchart",
+      "title": "Actual vs Projected Revenue",
+      "description": "Solid = actual, dashed = projected, shaded = confidence band",
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Actual"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#1E88E5"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 3
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Projected"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#43A047"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Optimistic (+10%)"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#66BB6A"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dot"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pessimistic (-15%)"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#EF5350"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dot"
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 8
+              },
+              {
+                "id": "custom.fillBelowTo",
+                "value": "Optimistic (+10%)"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "xTickLabelRotation": -45,
+        "showValue": "auto",
+        "barWidth": 0.7,
+        "groupWidth": 0.7,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT bc.cycle_code AS \"Cycle\", SUM(i.total_amount) AS \"Actual\" FROM billing_cycle bc JOIN invoice i ON i.cycle_id=bc.cycle_id GROUP BY bc.cycle_code ORDER BY bc.cycle_code;",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        },
+        {
+          "rawSql": "SELECT cycle_code AS \"Cycle\", projected_revenue AS \"Projected\", projected_revenue*1.10 AS \"Optimistic (+10%)\", projected_revenue*0.85 AS \"Pessimistic (-15%)\" FROM ra_projection ORDER BY cycle_code;",
+          "format": "table",
+          "refId": "B",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 4
+    },
+    {
+      "type": "barchart",
+      "title": "Monthly Cancellations",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#E53935"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "xTickLabelRotation": -45,
+        "showValue": "auto",
+        "barWidth": 0.7,
+        "groupWidth": 0.7,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT TO_CHAR(end_date,'YYYY-MM') AS \"Month\", COUNT(*) AS \"Cancellations\" FROM contract WHERE status IN ('CANCELLED','EXPIRED') AND end_date IS NOT NULL GROUP BY TO_CHAR(end_date,'YYYY-MM') ORDER BY \"Month\";",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 5
+    },
+    {
+      "type": "barchart",
+      "title": "Monthly New Activations",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#43A047"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "xTickLabelRotation": -45,
+        "showValue": "auto",
+        "barWidth": 0.7,
+        "groupWidth": 0.7,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT TO_CHAR(start_date,'YYYY-MM') AS \"Month\", COUNT(*) AS \"Activations\" FROM contract WHERE start_date>='2025-01-01' GROUP BY TO_CHAR(start_date,'YYYY-MM') ORDER BY \"Month\";",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 6
+    },
+    {
+      "type": "barchart",
+      "title": "\u23f3 Revenue at Risk \u2014 Loyalty Expiration",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 25
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#FB8C00"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "xTickLabelRotation": -45,
+        "showValue": "auto",
+        "barWidth": 0.7,
+        "groupWidth": 0.7,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT TO_CHAR(c.start_date+(c.loyalty_months||' months')::interval,'YYYY-MM') AS \"Expiry\", SUM(o.base_price) AS \"At Risk\", COUNT(*) AS \"Contracts\" FROM contract c JOIN offer o ON o.offer_id=c.offer_id WHERE c.status='ACTIVE' AND c.loyalty_months>0 AND c.start_date+(c.loyalty_months||' months')::interval>=NOW() GROUP BY \"Expiry\" ORDER BY \"Expiry\";",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 7
+    },
+    {
+      "type": "table",
+      "title": "Projection Details",
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 34
+      },
+      "fieldConfig": {
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Projected"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Optimistic"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pessimistic"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg Ticket"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT cycle_code AS \"Cycle\", projected_revenue AS \"Projected\", ROUND(projected_revenue*1.10,2) AS \"Optimistic\", ROUND(projected_revenue*0.85,2) AS \"Pessimistic\", active_contracts AS \"Contracts\", avg_ticket AS \"Avg Ticket\" FROM ra_projection ORDER BY cycle_code;",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 8
+    }
+  ],
+  "schemaVersion": 39,
+  "links": [
+    {
+      "title": "\ud83c\udfe0 Overview",
+      "type": "link",
+      "url": "/d/ra-overview",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udd0d RA Controls",
+      "type": "link",
+      "url": "/d/ra-controls",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\u26a0\ufe0f Gaps",
+      "type": "link",
+      "url": "/d/ra-gaps",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udce6 By Offer",
+      "type": "link",
+      "url": "/d/ra-by-offer",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udcc8 Projections",
+      "type": "link",
+      "url": "/d/ra-projections",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udc64 Customers",
+      "type": "link",
+      "url": "/d/ra-customers",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83e\udd16 ML Insights",
+      "type": "link",
+      "url": "/d/ra-ml-insights",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\uddc2\ufe0f Offers & Rules",
+      "type": "link",
+      "url": "/d/ra-offers-rules",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udcd1 Contracts & Rules",
+      "type": "link",
+      "url": "/d/ra-customer-contracts",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    }
+  ],
+  "time": {
+    "from": "2024-01-01T00:00:00.000Z",
+    "to": "2027-01-01T00:00:00.000Z"
+  },
+  "refresh": "",
+  "version": 1,
+  "id": null
+}

@@ -1,0 +1,469 @@
+{
+  "uid": "ra-by-offer",
+  "title": "\ud83d\udce6 By Offer",
+  "tags": [
+    "ra-poc"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "type": "barchart",
+      "title": "Revenue by Offer (12 months)",
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PLAN"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#1E88E5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ADDON"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#43A047"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PROMO"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FB8C00"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "xTickLabelRotation": -45,
+        "showValue": "auto",
+        "barWidth": 0.7,
+        "groupWidth": 0.7,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "transformations": [
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "Offer": {
+                "operation": "groupby",
+                "aggregations": []
+              },
+              "Type": {
+                "operation": "groupby",
+                "aggregations": []
+              },
+              "Revenue": {
+                "operation": "aggregate",
+                "aggregations": [
+                  "sum"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "targets": [
+        {
+          "rawSql": "SELECT o.offer_name AS \"Offer\", o.offer_type AS \"Type\", SUM(ii.final_amount) AS \"Revenue\" FROM offer o JOIN invoice_item ii ON ii.offer_id=o.offer_id GROUP BY o.offer_name, o.offer_type ORDER BY \"Revenue\" DESC;",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 1
+    },
+    {
+      "type": "table",
+      "title": "Revenue Detail by Offer",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 10
+      },
+      "fieldConfig": {
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Revenue"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Discounts"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "List Price"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Type"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "PLAN": {
+                        "color": "#1E88E5"
+                      },
+                      "ADDON": {
+                        "color": "#43A047"
+                      },
+                      "PROMO": {
+                        "color": "#FB8C00"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Revenue",
+            "desc": true
+          }
+        ]
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT o.offer_code AS \"Code\", o.offer_name AS \"Offer\", o.offer_type AS \"Type\", o.base_price AS \"List Price\", COUNT(DISTINCT ii.invoice_id) AS \"Invoices\", SUM(ii.final_amount) AS \"Revenue\", SUM(ii.discount_amount) AS \"Discounts\", COUNT(DISTINCT ct.customer_id) AS \"Customers\" FROM offer o JOIN invoice_item ii ON ii.offer_id=o.offer_id JOIN contract ct ON ct.contract_id=ii.contract_id GROUP BY o.offer_code, o.offer_name, o.offer_type, o.base_price ORDER BY SUM(ii.final_amount) DESC;",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 2
+    },
+    {
+      "type": "piechart",
+      "title": "Gap Value by Offer (Top 10)",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 19
+      },
+      "options": {
+        "pieType": "donut",
+        "reduceOptions": {
+          "values": true,
+          "calcs": []
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value",
+            "percent"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT o.offer_name AS metric, SUM(ABS(COALESCE(r.difference, r.expected_amount))) AS value FROM ra_result r JOIN contract ct ON ct.contract_id=r.contract_id JOIN offer o ON o.offer_id=ct.offer_id WHERE r.status LIKE 'GAP_%' GROUP BY o.offer_name ORDER BY value DESC LIMIT 10;",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 3
+    },
+    {
+      "type": "barchart",
+      "title": "Gap Count by Offer",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 19
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-reds"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "xTickLabelRotation": -45,
+        "showValue": "auto",
+        "barWidth": 0.7,
+        "groupWidth": 0.7,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT o.offer_code AS \"Offer\", COUNT(*) AS \"Gaps\", ROUND(SUM(ABS(COALESCE(r.difference, r.expected_amount)))::numeric,2) AS \"Value\" FROM ra_result r JOIN contract ct ON ct.contract_id=r.contract_id JOIN offer o ON o.offer_id=ct.offer_id WHERE r.status LIKE 'GAP_%' GROUP BY o.offer_code ORDER BY COUNT(*) DESC LIMIT 10;",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 4
+    },
+    {
+      "type": "table",
+      "title": "Active Contract Mix",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 29
+      },
+      "fieldConfig": {
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Monthly Potential"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Contracts",
+            "desc": true
+          }
+        ]
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT o.offer_type AS \"Type\", o.offer_name AS \"Offer\", COUNT(*) AS \"Contracts\", SUM(o.base_price) AS \"Monthly Potential\" FROM contract c JOIN offer o ON o.offer_id=c.offer_id WHERE c.status='ACTIVE' GROUP BY o.offer_type, o.offer_name ORDER BY COUNT(*) DESC;",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 5
+    }
+  ],
+  "schemaVersion": 39,
+  "links": [
+    {
+      "title": "\ud83c\udfe0 Overview",
+      "type": "link",
+      "url": "/d/ra-overview",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udd0d RA Controls",
+      "type": "link",
+      "url": "/d/ra-controls",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\u26a0\ufe0f Gaps",
+      "type": "link",
+      "url": "/d/ra-gaps",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udce6 By Offer",
+      "type": "link",
+      "url": "/d/ra-by-offer",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udcc8 Projections",
+      "type": "link",
+      "url": "/d/ra-projections",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udc64 Customers",
+      "type": "link",
+      "url": "/d/ra-customers",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83e\udd16 ML Insights",
+      "type": "link",
+      "url": "/d/ra-ml-insights",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\uddc2\ufe0f Offers & Rules",
+      "type": "link",
+      "url": "/d/ra-offers-rules",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udcd1 Contracts & Rules",
+      "type": "link",
+      "url": "/d/ra-customer-contracts",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    }
+  ],
+  "time": {
+    "from": "2024-01-01T00:00:00.000Z",
+    "to": "2027-01-01T00:00:00.000Z"
+  },
+  "refresh": "",
+  "version": 1,
+  "id": null
+}

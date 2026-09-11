@@ -1,0 +1,783 @@
+{
+  "uid": "ra-customers",
+  "title": "\ud83d\udc64 Customers",
+  "tags": [
+    "ra-poc"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 1,
+  "templating": {
+    "list": [
+      {
+        "name": "customer",
+        "type": "query",
+        "datasource": {
+          "type": "postgres",
+          "uid": "ra-postgres"
+        },
+        "query": "SELECT customer_code AS __value, customer_code || ' \u2014 ' || customer_name AS __text FROM customer ORDER BY customer_code;",
+        "label": "Customer",
+        "current": {
+          "text": "CLI-00001",
+          "value": "CLI-00001"
+        },
+        "refresh": 1,
+        "includeAll": false,
+        "definition": "SELECT customer_code AS __value, customer_code || ' \u2014 ' || customer_name AS __text FROM customer ORDER BY customer_code;",
+        "sort": 1,
+        "regex": ""
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "table",
+      "title": "\ud83d\udc64 Customer Info",
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "ACTIVE": {
+                        "text": "\u2705 ACTIVE",
+                        "color": "green"
+                      },
+                      "SUSPENDED": {
+                        "text": "\u26a0\ufe0f SUSPENDED",
+                        "color": "orange"
+                      },
+                      "CANCELLED": {
+                        "text": "\u274c CANCELLED",
+                        "color": "red"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Type"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "PF": {
+                        "text": "\ud83d\udc64 Individual (PF)"
+                      },
+                      "PJ": {
+                        "text": "\ud83c\udfe2 Business (PJ)"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "md"
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT customer_code AS \"Code\", customer_name AS \"Name\", customer_type AS \"Type\", status AS \"Status\", document_number AS \"Document\" FROM customer WHERE customer_code = '${customer}';",
+          "format": "table",
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          },
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "\ud83d\udccb Contracts",
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "fieldConfig": {
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "List Price"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Discount"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT c.contract_code AS \"Contract\", o.offer_name AS \"Offer\", o.offer_type AS \"Type\", o.base_price AS \"List Price\", c.status AS \"Status\", c.start_date AS \"Start\", c.end_date AS \"End\", c.loyalty_months AS \"Loyalty\", c.discount_pct AS \"Discount\" FROM contract c JOIN offer o ON o.offer_id=c.offer_id JOIN customer cu ON cu.customer_id=c.customer_id WHERE cu.customer_code='${customer}' ORDER BY c.start_date;",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 2
+    },
+    {
+      "type": "barchart",
+      "title": "\ud83d\udcb0 Invoice History",
+      "gridPos": {
+        "h": 9,
+        "w": 14,
+        "x": 0,
+        "y": 14
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PAID"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#43A047"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ISSUED"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#1E88E5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "OVERDUE"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#E53935"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "xTickLabelRotation": -45,
+        "showValue": "auto",
+        "barWidth": 0.7,
+        "groupWidth": 0.7,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT bc.cycle_code AS \"Cycle\", i.total_amount AS \"Amount\", i.status AS \"Status\"\nFROM invoice i\nJOIN billing_cycle bc ON bc.cycle_id = i.cycle_id\nJOIN customer cu ON cu.customer_id = i.customer_id\nWHERE cu.customer_code = '${customer}'\nORDER BY bc.cycle_code;",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 3
+    },
+    {
+      "type": "table",
+      "title": "Invoice Details",
+      "gridPos": {
+        "h": 9,
+        "w": 10,
+        "x": 14,
+        "y": 14
+      },
+      "fieldConfig": {
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Amount"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT bc.cycle_code AS \"Cycle\", i.invoice_number AS \"Invoice\", i.total_amount AS \"Amount\", i.status AS \"Status\", i.invoice_date::date AS \"Date\" FROM invoice i JOIN billing_cycle bc ON bc.cycle_id=i.cycle_id JOIN customer cu ON cu.customer_id=i.customer_id WHERE cu.customer_code='${customer}' ORDER BY bc.cycle_code;",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 4
+    },
+    {
+      "type": "stat",
+      "title": "Total Checks",
+      "gridPos": {
+        "h": 3,
+        "w": 8,
+        "x": 0,
+        "y": 23
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#1E88E5"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#1E88E5",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS \"Checks\" FROM ra_result r JOIN customer cu ON cu.customer_id=r.customer_id WHERE cu.customer_code='${customer}';",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 5
+    },
+    {
+      "type": "stat",
+      "title": "Matches",
+      "gridPos": {
+        "h": 3,
+        "w": 8,
+        "x": 8,
+        "y": 23
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#43A047"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#43A047",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS \"Match\" FROM ra_result r JOIN customer cu ON cu.customer_id=r.customer_id WHERE cu.customer_code='${customer}' AND r.status='MATCH';",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 6
+    },
+    {
+      "type": "stat",
+      "title": "Gaps",
+      "gridPos": {
+        "h": 3,
+        "w": 8,
+        "x": 16,
+        "y": 23
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#E53935"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#E53935",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) AS \"Gaps\" FROM ra_result r JOIN customer cu ON cu.customer_id=r.customer_id WHERE cu.customer_code='${customer}' AND r.status LIKE 'GAP_%';",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 7
+    },
+    {
+      "type": "table",
+      "title": "\ud83d\udee1\ufe0f RA Results",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "fieldConfig": {
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Expected"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Billed"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Difference"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-reds"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "MATCH": {
+                        "text": "\u2705 Match",
+                        "color": "#43A047"
+                      },
+                      "JUSTIFIED": {
+                        "text": "\u26a0\ufe0f Justified",
+                        "color": "#FB8C00"
+                      },
+                      "GAP_OVERCHARGE": {
+                        "text": "\ud83d\udd34 Overcharge",
+                        "color": "#E53935"
+                      },
+                      "GAP_UNDERCHARGE": {
+                        "text": "\ud83d\udfe0 Undercharge",
+                        "color": "#FF7043"
+                      },
+                      "GAP_MISSING": {
+                        "text": "\ud83d\udfe3 Missing",
+                        "color": "#8E24AA"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT bc.cycle_code AS \"Cycle\", o.offer_name AS \"Offer\", r.status AS \"Status\", r.expected_amount AS \"Expected\", r.billed_amount AS \"Billed\", r.difference AS \"Difference\", r.justification AS \"Justification\" FROM ra_result r JOIN ra_run rr ON rr.run_id=r.run_id JOIN billing_cycle bc ON bc.cycle_id=rr.cycle_id JOIN contract ct ON ct.contract_id=r.contract_id JOIN offer o ON o.offer_id=ct.offer_id JOIN customer cu ON cu.customer_id=r.customer_id WHERE cu.customer_code='${customer}' ORDER BY bc.cycle_code;",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 8
+    },
+    {
+      "type": "barchart",
+      "title": "RA Results Timeline",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 35
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Match"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#43A047"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Justified"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FB8C00"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Gap"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#E53935"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "xTickLabelRotation": -45,
+        "showValue": "auto",
+        "barWidth": 0.7,
+        "groupWidth": 0.7,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "rawSql": "SELECT bc.cycle_code AS \"Cycle\", SUM(CASE WHEN r.status='MATCH' THEN 1 ELSE 0 END) AS \"Match\", SUM(CASE WHEN r.status='JUSTIFIED' THEN 1 ELSE 0 END) AS \"Justified\", SUM(CASE WHEN r.status LIKE 'GAP_%' THEN 1 ELSE 0 END) AS \"Gap\" FROM ra_result r JOIN ra_run rr ON rr.run_id=r.run_id JOIN billing_cycle bc ON bc.cycle_id=rr.cycle_id JOIN customer cu ON cu.customer_id=r.customer_id WHERE cu.customer_code='${customer}' GROUP BY bc.cycle_code ORDER BY bc.cycle_code;",
+          "format": "table",
+          "refId": "A",
+          "hide": false,
+          "datasource": {
+            "type": "postgres",
+            "uid": "ra-postgres"
+          }
+        }
+      ],
+      "datasource": {
+        "type": "postgres",
+        "uid": "ra-postgres"
+      },
+      "id": 9
+    }
+  ],
+  "schemaVersion": 39,
+  "links": [
+    {
+      "title": "\ud83c\udfe0 Overview",
+      "type": "link",
+      "url": "/d/ra-overview",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udd0d RA Controls",
+      "type": "link",
+      "url": "/d/ra-controls",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\u26a0\ufe0f Gaps",
+      "type": "link",
+      "url": "/d/ra-gaps",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udce6 By Offer",
+      "type": "link",
+      "url": "/d/ra-by-offer",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udcc8 Projections",
+      "type": "link",
+      "url": "/d/ra-projections",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udc64 Customers",
+      "type": "link",
+      "url": "/d/ra-customers",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83e\udd16 ML Insights",
+      "type": "link",
+      "url": "/d/ra-ml-insights",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\uddc2\ufe0f Offers & Rules",
+      "type": "link",
+      "url": "/d/ra-offers-rules",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    },
+    {
+      "title": "\ud83d\udcd1 Contracts & Rules",
+      "type": "link",
+      "url": "/d/ra-customer-contracts",
+      "icon": "external link",
+      "keepTime": true,
+      "includeVars": true,
+      "targetBlank": false
+    }
+  ],
+  "time": {
+    "from": "2024-01-01T00:00:00.000Z",
+    "to": "2027-01-01T00:00:00.000Z"
+  },
+  "refresh": "",
+  "version": 1,
+  "id": null
+}

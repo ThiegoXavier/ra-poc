@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 RA-PoC Data Generator
-Generates fake billing data for 12 months to simulate an EB-like environment.
+Generates synthetic billing data for 12 months to simulate a generic telecom billing environment.
 - ~20 offers with rules
 - ~1000 customers
 - 1-3 contracts per customer

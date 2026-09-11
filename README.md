@@ -254,7 +254,7 @@ Example:
 
 ```bash
 cd ~
-git clone <REPOSITORY_URL> ra-poc
+git clone git@github.com:ThiegoXavier/ra-poc.git ra-poc
 ```
 
 Enter the project directory:
